@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nouveau Client</title>
+  <link rel="stylesheet" href="./css/rekonektSuivi.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script src="./js/rekonektSuivi.js" defer></script>
+  <link rel="stylesheet" href="./css/nouveauClient.css">
+  <script src="./js/nouveauClient.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <link href="https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <header>
+    <nav class="menu">
+      <div class="navbar-logo">
+        <a href="rekonektSuivi.html"><img src="./images/logo.png" alt="Logo"></a>
+
+      </div>
+      <ul class="menu-links">
+
+        <li><a href="nouveauClient.html"> Prise en charge</a></li>
+        <li><a href="reparationsEnCours.html">Réparations en Cours</a></li>
+        <li><a href="reparationsEnAttentes.html">Réparations en Attentes</a></li>
+        <li><a href="reparationsTerminees.html">Réparations Terminées</a></li>
+        <li><a href="historique.html">Historique</a></li>
+        <li> <a href="accueilClient.html">clients</a> </li>
+      </ul>
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Rechercher un client..."><span
+          class="search-icon">&#128269;</span>
+      </div>
+    </nav>
+  </header>
+  <p><br></p>
+
+  <!-- <div class="container"> -->
+  <button id="generatePdf">
+    <i class='bx bxs-file-pdf'></i>
+  </button>
+
+  <img id="logo2" src="./images/logo2.png" style="display:none;">
+
+  <section class="forms-section">
+    <h2 class="section-title">Informations Client et Appareil </h2>
+    <div class="forms">
+      <div class="form-wrapper is-active">
+        <button type="button" class="switcher switcher-login">
+          Client
+          <span class="underline"></span>
+        </button>
+        <form class="form form-login" id="clientForm">
+          <fieldset>
+            <legend>Please, enter your email and password for login.</legend>
+            <div class="input-block">
+
+              <input type="hidden" id="clientID" name="clientID" />
+              <div class="civilite">
+
+                <label class="boxcil" for="genreFem">Mme</label>
+                <input type="radio" value="Mme" id="genreFem" name="civilite" />
+                <label class="boxcil" for="genreMas">M.</label>
+                <input type="radio" value="M." id="genreMas" name="civilite" /><br>
+              </div>
+
+              <label for="leNom">Nom </label><br>
+              <input id="leNom" type="name" name="leNom" required>
+              <label for="lePrenom">Prénom</label>
+              <input type="text" id="lePrenom" name="lePrenom" required />
+              <label for="idInscription">Identifiant Client</label>
+              <input type="text" id="idInscription" name="idInscription" />
+              <label for="numTel">Numéro de Téléphone</label>
+              <input type="text" id="numTel" name="numTel" />
+
+              <label for="email">Adresse email</label>
+              <input type="email" id="email" name="email" placeholder="adresse@email.com" size="30" required>
+            </div>
+            <div class="input-block">
+
+              <label for="noteClient">Commentaire Client</label>
+              <input type="text" id="noteClient" name="noteClient" />
+              <label for="noteInterne">Note Interne</label>
+              <input type="text" id="noteInterne" name="noteInterne" />
+            </div>
+          </fieldset>
+
+          <button type="submit" id="validerClient" class="btn-login">Valider</button>
+        </form>
+      </div>
+      <div class="form-wrapper">
+        <button type="button" class="switcher switcher-signup">
+          Appareil
+          <span class="underline"></span>
+        </button>
+        <form class="form form-signup" id="formulaire">
+          <fieldset>
+            <legend>Please, enter your email, password and password confirmation for sign up.</legend>
+            <div class="input-block">
+              <div class="input-block">
+                <label for="num_suivi">Numéro de Suivi</label>
+                <input type="text" id="num_suivi" name="num_suivi" readonly />
+
+                <div class="input-block">
+
+                  <label for="letype">Type</label>
+                  <select id="letype" class="mySelect" name="letype">
+                    <option value=""></option>
+                    <option value="smartphone">Smartphone</option>
+                    <option value="tablet">Tablette</option>
+                    <option value="ordinateur">Ordinateur</option>
+                    <option value="console">Console</option>
+                  </select>
+
+                </div>
+                <div class="input-block">
+                  <label for="lamarque">Marque</label>
+                  <select class="mySelect" id="lamarque" name="lamarque" onchange="checkCustomInput('marque')">
+                    <option value=""></option>
+                    <option value="apple">Apple</option>
+                    <option value="samsung">Samsung</option>
+                    <option value="oppo">Oppo</option>
+                    <option value="huawei">Huawei</option>
+                    <option value="xiaomi">Xiaomi</option>
+                    <option value="google-pixel">Google Pixel</option>
+                    <option value="pocophone">Pocophone</option>
+                    <option value="oneplus">OnePlus</option>
+                    <option value="realme">Realme</option>
+                    <option value="sony">Sony</option>
+                    <option value="motorola">Motorola</option>
+                    <option value="asus">Asus</option>
+                    <option value="vivo">Vivo</option>
+                    <option value="wiko">Wiko</option>
+                    <option value="crosscall">Crosscall</option>
+                    <option value="blackview">BlackView</option>
+                    <option value="blackberry">Blackberry</option>
+
+                    <!-- Ordinateurs -->
+                    <option value="mac">Mac</option>
+                    <option value="surface">Surface</option>
+
+                    <!-- Tablettes -->
+                    <option value="ipad">iPad</option>
+                    <option value="samsung-tab">Samsung Tab</option>
+                    <option value="huawei-tab">Huawei</option>
+                    <option value="surface-tab">Surface</option>
+                    <option value="asus-tab">Asus</option>
+
+                    <!-- Consoles de jeux -->
+                    <option value="nintendo">Nintendo</option>
+                    <option value="playstation">Playstation</option>
+                    <option value="xbox">Xbox</option>
+                  </select>
+                  <input type="text" id="customMarque" name="customMarque" placeholder="Entrez une autre marque"
+                    style="display:none;">
+                </div>
+                <div class="input-block">
+                  <label for="lemodele">Modèle</label>
+                  <select id="lemodele" class="mySelect" name="lemodele" onchange="checkCustomInput('modele')">
+                    <option value=""></option>
+                    <option value="iPhone">iPhone </option>
+                    <option value="iPhone 13">iPhone 13</option>
+                    <option value="iPhone 14 Pro">iPhone 14 Pro</option>
+                    <option value="iPhone 12">iPhone 12</option>
+                    <option value="iPhone 11">iPhone 11</option>
+                    <option value="Galaxy S">Galaxy S</option>
+                    <option value="Galaxy A">Galaxy A</option>
+                    <option value="Galaxy Z">Galaxy Z</option>
+                    <option value="Find X5 Pro">Find X5 Pro</option>
+                    <option value="Reno 8">Reno 8</option>
+                    <option value="A54">A54</option>
+                    <option value="P50 Pro">P50 Pro</option>
+                    <option value="Mate 40">Mate 40</option>
+                    <option value="Nova 9">Nova 9</option>
+                    <option value="Mi 11">Mi 11</option>
+                    <option value="Redmi Note 11">Redmi Note 11</option>
+                    <option value="Poco F4">Poco F4</option>
+                    <option value="Pixel 7">Pixel 7</option>
+                    <option value="Pixel 6a">Pixel 6a</option>
+                    <option value="Pixel 5">Pixel 5</option>
+                    <option value="Poco X3 Pro">Poco X3 Pro</option>
+                    <option value="Poco F3">Poco F3</option>
+                    <option value="Poco M4 Pro">Poco M4 Pro</option>
+                    <option value="OnePlus 10 Pro">OnePlus 10 Pro</option>
+                    <option value="OnePlus Nord 2">OnePlus Nord 2</option>
+                    <option value="OnePlus 9">OnePlus 9</option>
+                    <option value="GT 2 Pro">GT 2 Pro</option>
+                    <option value="Narzo 50">Narzo 50</option>
+                    <option value="C35">C35</option>
+                    <option value="Xperia 1 IV">Xperia 1 IV</option>
+                    <option value="Xperia 10 III">Xperia 10 III</option>
+                    <option value="Xperia 5 II">Xperia 5 II</option>
+                    <option value="Moto G Power">Moto G Power</option>
+                    <option value="Moto Edge 30">Moto Edge 30</option>
+                    <option value="Moto Razr 5G">Moto Razr 5G</option>
+                    <option value="ROG Phone 6">ROG Phone 6</option>
+                    <option value="Zenfone 8">Zenfone 8</option>
+                    <option value="ROG Phone 5">ROG Phone 5</option>
+                    <option value="X80 Pro">X80 Pro</option>
+                    <option value="V23 5G">V23 5G</option>
+                    <option value="Y21">Y21</option>
+                    <option value="Power U30">Power U30</option>
+                    <option value="Y81">Y81</option>
+                    <option value="View 5 Plus">View 5 Plus</option>
+                    <option value="Core-X4">Core-X4</option>
+                    <option value="Trekker-X4">Trekker-X4</option>
+                    <option value="Action-X3">Action-X3</option>
+                    <option value="BV9900">BV9900</option>
+                    <option value="A80 Pro">A80 Pro</option>
+                    <option value="BV6300">BV6300</option>
+                    <option value="Key2">Key2</option>
+                    <option value="KeyOne">KeyOne</option>
+                    <option value="Passport">Passport</option>
+
+                    <!-- Ordinateurs -->
+                    <option value="MacBook Pro">MacBook Pro</option>
+                    <option value="MacBook Air">MacBook Air</option>
+                    <option value="iMac">iMac</option>
+                    <option value="Surface Pro 9">Surface Pro 9</option>
+                    <option value="Surface Laptop 4">Surface Laptop 4</option>
+                    <option value="Surface Go 3">Surface Go 3</option>
+
+                    <!-- Tablettes -->
+                    <option value="iPad Pro">iPad Pro</option>
+                    <option value="iPad Air">iPad Air</option>
+                    <option value="iPad Mini">iPad Mini</option>
+                    <option value="Galaxy Tab S8">Galaxy Tab S8</option>
+                    <option value="Galaxy Tab A7">Galaxy Tab A7</option>
+                    <option value="Galaxy Tab S6 Lite">Galaxy Tab S6 Lite</option>
+                    <option value="MatePad Pro">MatePad Pro</option>
+                    <option value="MediaPad T5">MediaPad T5</option>
+                    <option value="MatePad 11">MatePad 11</option>
+                    <option value="Surface Pro 8">Surface Pro 8</option>
+                    <option value="Surface Go 2">Surface Go 2</option>
+                    <option value="Surface Pro X">Surface Pro X</option>
+                    <option value="ZenPad 3S">ZenPad 3S</option>
+                    <option value="Transformer Mini">Transformer Mini</option>
+                    <option value="ZenPad 10">ZenPad 10</option>
+
+                    <!-- Consoles de jeux -->
+                    <option value="Switch OLED">Switch OLED</option>
+                    <option value="Switch Lite">Switch Lite</option>
+                    <option value="Wii U">Wii U</option>
+                    <option value="PS5">PS5</option>
+                    <option value="PS4 Pro">PS4 Pro</option>
+                    <option value="PS Vita">PS Vita</option>
+                    <option value="Series X">Series X</option>
+                    <option value="Series S">Series S</option>
+                    <option value="Xbox One X">Xbox One X</option>
+                    <option value="Autre..">Autre...</option>
+                  </select>
+                  <input type="text" id="customModele" name="customModele" placeholder="Entrez un autre modèle"
+                    style="display:none;">
+                </div>
+                <div class="input-block">
+                  <label for="letat">État</label>
+                  <input type="text" id="letat" name="letat" />
+                </div>
+                <div class="input-block">
+                  <label for="serie_imei">N° SERIE / IMEI : </label>
+                  <input type="text" id="serie_imei" name="serie_imei" />
+                </div>
+                <div class="input-block">
+                  <label for="nomUt">Nom d'Utilisateur</label>
+                  <input type="text" id="nomUt" name="nomUt" />
+                </div>
+                <div class="input-block">
+                  <label for="mtp">Mot de Passe</label>
+                  <input type="text" id="mtp" name="mtp" />
+                </div>
+                <div class="input-block">
+                  <label for="consta">Panne Constatée</label>
+                  <input type="text" id="consta" name="consta">
+                </div>
+                <div class="input-block">
+                  <label for="proposition">Réparation Proposée</label>
+                  <input type="text" id="proposition" name="proposition">
+                </div>
+              </div>
+            </div>
+
+            <div class="input-block">
+              <label for="prix">Prix</label>
+              <input type="number" id="prix" name="prix" step="0.01">
+              <label for="acompte">Acompte</label>
+              <input type="number" id="acompte" name="acompte" step="0.01">
+              <div class="check">
+                <label for="accord">Accord Client</label>
+                <input type="radio" value="oui" id="accordOui" name="accord" /><label class="boxcil"
+                  for="accordOui">OUI</label>
+                <input type="radio" value="non" id="accordNon" name="accord" /><label class="boxcil"
+                  for="accordNon">NON</label>
+              </div>
+            </div>
+          </fieldset>
+
+          <button type="submit" id="validerAppareil" class="btn-signup">Valider</button>
+        </form>
+      </div>
+    </div>
+  </section>
+  </div>
+  <canvas id="barcodeCanvas" style="display:none;"></canvas>
+
+  <script>
+    const switchers = [...document.querySelectorAll('.switcher')]
+
+    switchers.forEach(item => {
+      item.addEventListener('click', function () {
+        switchers.forEach(item => item.parentElement.classList.remove('is-active'))
+        this.parentElement.classList.add('is-active')
+      })
+    })
+
+
+  </script>
+
+</body>
+
+</html>

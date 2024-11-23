@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="./css/reparationEnCours.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="./js/reparationsEnCours.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <header>
+            <div class="menu">
+                <div class="navbar-logo">
+                    <a href="rekonektSuivi.html"><img src="./images/logo.png" alt="Logo"></a>
+                </div>
+                <ul class="menu-links">
+                    <li><a href="nouveauClient.html">Prise en charge</a></li>
+                    <li><a href="reparationsEnCours.html">Réparations en Cours</a></li>
+                    <li><a href="reparationsEnAttentes.html">Réparations en Attentes</a></li>
+                    <li><a href="reparationsTerminees.html">Réparations Terminées</a></li>
+                    <li><a href="historique.html">Historique</a></li>
+                    <li><a href="accueilClient.html">client</a></li>
+                </ul>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Rechercher un client..."><span
+                        class="search-icon">&#128269;</span>
+                </div>
+            </div>
+        </header>
+    </header>
+
+    <div class="grid-container" id="enCoursTickets">
+
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Re-KonektSuivi</p>
+    </footer>
+    <div id="messageBox" class="message-box"></div>
+    <script src="./js/rekonektSuivi.js"></script>
+</body>
+
+</html>
