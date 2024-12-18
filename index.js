@@ -5,14 +5,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const app = express();
 
-/*require('dotenv').config();
-const express = require('express');
-//const mysql = require('mysql2');
-const app = express();
-const cors = require('cors');
-const bodyParser = require('body-parser');*/
-
-
 // Configure CORS
 app.use(cors());
 
@@ -30,16 +22,6 @@ const pool = new Pool({
   }
 });
 
-/*// Configure la connexion MySQL
-
-const pool = mysql.createConnection({
-  host: "localhost",
-  user: "root", // Remplacez par votre utilisateur MySQL
-  password: "", // Remplacez par votre mot de passe MySQL
-  database: "bddrekonekt", // Nom de la base de données créée
-});
-*/
-
 // connexion à la base de données
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
@@ -51,16 +33,7 @@ pool.query('SELECT NOW()', (err, res) => {
 
 module.exports = pool;
 
-/*// Connexion à MySQL
-pool.connect((err) => {
-  if (err) {
-    console.error("Erreur de connexion à MySQL :", err);
-    return;
-  }
-  console.log("Connecté à MySQL");
-});*/
-
-// Route pour gérer l'ajout d'un appareil
+// Route pour gérer l'ajout d'un appareil (version async/await conservée)
 app.post("/nouvelAppareil", async (req, res) => {
   try {
     const appareilData = req.body;
@@ -81,8 +54,8 @@ app.post("/nouvelAppareil", async (req, res) => {
     const dateDepot = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
     const sql = `
-      INSERT INTO appareils (num_suivi, letype, lamarque, lemodele, letat, serie_imei, nomut, mtp, consta, proposition, prix, acompte, accord, client_id, resultat, date_depot) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      INSERT INTO appareils (num_suivi, letype, lamarque, lemodele, autre_appareil, letat, serie_imei, nomut, mtp, consta, proposition, prix, acompte, accord, client_id, resultat, date_depot) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING id
     `;
 
@@ -91,6 +64,7 @@ app.post("/nouvelAppareil", async (req, res) => {
       appareilData.letype,
       marque,
       modele,
+      appareilData.autre_appareil,
       appareilData.letat,
       appareilData.serie_imei,
       appareilData.nomUt,
@@ -113,67 +87,6 @@ app.post("/nouvelAppareil", async (req, res) => {
     console.error("Erreur lors de l'insertion:", err);
     return res.status(500).json({ error: "Erreur lors de l'insertion des données" });
   }
-});
-
-app.post("/nouvelAppareil", (req, res) => {
-  const appareilData = req.body;
-
-  // Vérifie que les données requises sont bien présentes
-  if (!appareilData.client_id || !appareilData.num_suivi || !appareilData.letype) {
-    return res.status(400).json({ error: "Données manquantes" });
-  }
-
-  // Gestion de la marque et du modèle personnalisés
-  const marque = appareilData.customMarque && appareilData.customMarque.trim() !== ""
-    ? appareilData.customMarque
-    : appareilData.lamarque;
-
-  const modele = appareilData.customModele && appareilData.customModele.trim() !== ""
-    ? appareilData.customModele
-    : appareilData.lemodele;
-
-  // Gestion de la date de dépôt
-  const dateDepot = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-  // Insére les données dans la base de données
-  const sql = `
-    INSERT INTO appareils (num_suivi, letype, lamarque, lemodele, letat, serie_imei, nomut, mtp, consta, proposition, prix, acompte, accord, client_id, resultat, date_depot) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-   RETURNING id
-  `;
-
-  pool.query(
-    sql,
-    [
-      appareilData.num_suivi,
-      appareilData.letype,
-      marque,
-      modele,
-      appareilData.letat,
-      appareilData.serie_imei,
-      appareilData.nomUt,
-      appareilData.mtp,
-      appareilData.consta,
-      appareilData.proposition,
-      appareilData.prix,
-      appareilData.acompte,
-      appareilData.accord,
-      appareilData.client_id,
-      appareilData.resultat,
-      dateDepot,
-    ],
-    (err, result) => {
-      if (err) {
-        console.error("Erreur lors de l'insertion:", err);
-        return res.status(500).json({ error: "Erreur lors de l'insertion des données" });
-      }
-
-      res.status(201).json({
-        message: "Appareil ajouté avec succès",
-        appareilId: result.rows[0].id,
-      });
-    }
-  );
 });
 
 // Route pour gérer l'ajout d'un nouveau client
@@ -224,7 +137,6 @@ app.post("/nouveauClient", (req, res) => {
 app.get("/appareil/:id", (req, res) => {
   const appareilId = req.params.id;
 
-  // Requête SQL avec jointure pour récupérer l'appareil et le client
   const sql = `
     SELECT 
       appareils.*,
@@ -241,32 +153,34 @@ app.get("/appareil/:id", (req, res) => {
 
   pool.query(sql, [appareilId], (err, result) => {
     if (err) {
-      console.error("Erreur lors de la récupération des données :", err.sqlMessage);
+      console.error("Erreur lors de la récupération des données :", err.message);
       return res.status(500).json({ error: "Erreur lors de la récupération des données" });
     }
 
-    if (result.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ message: "Appareil non trouvé" });
     }
 
-    res.json(result[0]);
+    res.json(result.rows[0]);
   });
 });
 
 // Route pour mettre à jour le statut du ticket
 app.put('/updateTicketStatus', (req, res) => {
-  const { ticketId, status } = req.body;
+  const { ticketId, status, commentaire } = req.body;
 
-  const sql = 'UPDATE appareils SET resultat = $1 WHERE num_suivi = $2';
+  const sql = `
+    UPDATE appareils 
+    SET resultat = $1, commentaire = COALESCE(commentaire || ' | ', '') || $2 
+    WHERE num_suivi = $3
+  `;
 
-  pool.query(sql, [status, ticketId], (err, result) => {
+  pool.query(sql, [status, commentaire || '', ticketId], (err) => {
     if (err) {
-      console.error('Erreur lors de la mise à jour du statut:', err);
-      return res.status(500).json({ error: 'Erreur lors de la mise à jour du statut' });
+      console.error('Erreur lors de la mise à jour du statut :', err);
+      return res.status(500).json({ error: 'Erreur lors de la mise à jour du statut.' });
     }
-
-    console.log(`Statut du ticket ${ticketId} mis à jour à ${status}`);
-    res.status(200).json({ message: 'Statut mis à jour avec succès' });
+    res.status(200).json({ message: 'Statut mis à jour avec succès.' });
   });
 });
 
@@ -274,7 +188,6 @@ app.put('/updateTicketStatus', (req, res) => {
 app.post('/recupererTicket/:id', (req, res) => {
   const ticketId = req.params.id;
 
-  // Requête SQL pour mettre à jour le statut du ticket à 'Récupéré'
   const sql = 'UPDATE appareils SET resultat = $1 WHERE id = $2';
 
   pool.query(sql, ['Récupéré', ticketId], (err, result) => {
@@ -283,7 +196,7 @@ app.post('/recupererTicket/:id', (req, res) => {
       return res.status(500).json({ error: 'Erreur lors de la mise à jour du ticket' });
     }
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Ticket non trouvé' });
     }
 
@@ -298,7 +211,7 @@ app.get('/tickets', (req, res) => {
   let sql = `
     SELECT 
       appareils.*, 
-      client.nom, client.prenom, client.telephone 
+      client.nom, client.prenom, client.telephone, appareils.commentaire
     FROM 
       appareils 
     JOIN 
@@ -318,12 +231,11 @@ app.get('/tickets', (req, res) => {
       console.error('Erreur lors de la récupération des tickets :', err);
       return res.status(500).json({ error: 'Erreur lors de la récupération des tickets' });
     }
-
     res.json(results.rows);
   });
 });
 
-// Route pour récupérer les tickets terminés
+// Route pour récupérer les tickets terminés (ajout du commentaire)
 app.get('/ticketsTermines', (req, res) => {
   const sql = `
     SELECT 
@@ -331,9 +243,10 @@ app.get('/ticketsTermines', (req, res) => {
       appareils.id,
       appareils.num_suivi,
       appareils.client_id,
-      appareils.lemodele,
+      appareils.letype, appareils.lamarque, appareils.lemodele, appareils.autre_appareil,
       appareils.proposition,
       appareils.prix,
+      appareils.commentaire,  -- Assurez-vous que cette colonne est incluse
       client.nom, client.prenom, client.telephone 
     FROM 
       appareils 
@@ -355,13 +268,14 @@ app.get('/ticketsTermines', (req, res) => {
   });
 });
 
+
 // Route pour récupérer les tickets récupérés
 app.get('/historiqueTickets', (req, res) => {
   const sql = `
     SELECT 
       appareils.date_depot,
       client.nom, client.prenom,
-      appareils.letype, appareils.lamarque, appareils.lemodele,
+      appareils.letype, appareils.lamarque, appareils.lemodele, appareils.autre_appareil,
       appareils.num_suivi,
       appareils.proposition,
       appareils.prix
@@ -392,7 +306,7 @@ app.get('/historiqueTickets', (req, res) => {
   });
 });
 
-//route pour connexion client 
+// route pour connexion client 
 app.post('/connexionClient', async (req, res) => {
   const { numeroSuivi, nom } = req.body;
   const query = `SELECT * FROM client WHERE num_suivi = $1 AND nom = $2`;
@@ -411,28 +325,7 @@ app.post('/connexionClient', async (req, res) => {
   }
 });
 
-/*app.post('/connexionClient', (req, res) => {
-  const { numeroSuivi, nom } = req.body;
-  const query = `SELECT * FROM client WHERE id = $1 OR nom = $2`;
-
-
-  pool.query(query, [numeroSuivi, nom], (err, results) => {
-    if (err) {
-      console.error('Erreur lors de la récupération des données client :', err);
-      return res.status(500).json({ error: 'Erreur lors de la vérification des données client' });
-    }
-
-    if (results.length > 0) {
-      res.json({ message: 'Connexion réussie', client: results[0] });
-    } else {
-      res.status(401).json({ message: 'Informations incorrectes' });
-    }
-  });
-});*/
-
-
-// route pour recuperer le client connecter 
-
+// route pour recuperer le client connecté 
 app.get('/client/:id', (req, res) => {
   const clientId = req.params.id;
 
@@ -444,41 +337,13 @@ app.get('/client/:id', (req, res) => {
       return res.status(500).json({ error: 'Erreur lors de la récupération des données client' });
     }
 
-    if (results.length > 0) {
-      res.json(results[0]);
+    if (results.rows.length > 0) {
+      res.json(results.rows[0]);
     } else {
       res.status(404).json({ message: 'Client non trouvé' });
     }
   });
 });
-
-
-// route pour affichage tableau 
-/*app.get('/repairList/:clientId', async (req, res) => {
-  const clientId = req.params.clientId;
-
-  const query = `
-    SELECT 
-      appareils.num_suivi, 
-      appareils.date_depot, 
-      appareils.lemodele, 
-      appareils.prix, 
-      appareils.resultat,
-      appareils.proposition
-    FROM 
-      appareils
-    WHERE 
-      appareils.client_id = $1
-  `;
-
-  try {
-    const results = await pool.query(query, [clientId]);
-    res.json(results.rows);
-  } catch (err) {
-    console.error('Erreur lors de la récupération des réparations :', err);
-    return res.status(500).json({ error: 'Erreur lors de la récupération des réparations.' });
-  }
-});*/
 
 app.get('/repairList/:clientId', (req, res) => {
   const clientId = req.params.clientId;
@@ -487,11 +352,10 @@ app.get('/repairList/:clientId', (req, res) => {
       SELECT 
           appareils.num_suivi, 
           appareils.date_depot, 
-          appareils.lemodele, 
+          appareils.letype, appareils.lamarque, appareils.lemodele, appareils.autre_appareil,
           appareils.prix, 
           appareils.resultat,
           appareils.proposition
-          
       FROM 
           appareils
       WHERE 
@@ -508,6 +372,31 @@ app.get('/repairList/:clientId', (req, res) => {
   });
 });
 
+app.post('/ajouterCommentaire', (req, res) => {
+  const { ticketId, commentaire } = req.body;
+
+  const sql = `INSERT INTO commentaires (ticket_id, commentaire) VALUES ($1, $2) RETURNING *`;
+  pool.query(sql, [ticketId, commentaire], (err, result) => {
+    if (err) {
+      console.error("Erreur lors de l'insertion :", err);
+      return res.status(500).json({ error: "Erreur lors de l'insertion du commentaire" });
+    }
+    res.json({ message: "Commentaire ajouté", commentaire: result.rows[0] });
+  });
+});
+
+app.get('/commentaires/:ticketId', (req, res) => {
+  const { ticketId } = req.params;
+
+  const sql = `SELECT commentaire FROM appareils WHERE num_suivi = $1`;
+  pool.query(sql, [ticketId], (err, result) => {
+    if (err) {
+      console.error("Erreur lors de la récupération des commentaires :", err);
+      return res.status(500).json({ error: "Erreur lors de la récupération des commentaires" });
+    }
+    res.json(result.rows);
+  });
+});
 
 // route pour affichage tableau
 app.get('/', async (req, res) => {
@@ -520,30 +409,24 @@ app.get('/', async (req, res) => {
   }
 });
 
+app.put('/modifierTicket', (req, res) => {
+  const { ticketId, commentaire } = req.body;
+
+  const sql = `
+    UPDATE appareils
+    SET commentaire = $1
+    WHERE num_suivi = $2
+  `;
+
+  pool.query(sql, [commentaire, ticketId], (err) => {
+    if (err) {
+      console.error('Erreur lors de la mise à jour du ticket :', err);
+      return res.status(500).json({ error: 'Mise à jour impossible.' });
+    }
+    res.status(200).json({ message: 'Ticket mis à jour avec succès.' });
+  });
+});
+
 app.listen(3000, () => {
   console.log('Serveur démarré sur le port 3000');
 });
-/*
-// Route de test
-app.get('/', (req, res) => {
-  res.send('Application en ligne !');
-});
-
-// Gestion des erreurs
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Erreur serveur !');
-});
-
-// Démarrage du serveur
-const port = process.env.PORT || 3000;
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Serveur démarré sur le port ${port}`);
-});
-
-// Gestion des erreurs non capturées
-process.on('uncaughtException', (err) => {
-  console.error('Erreur non capturée:', err);
-});
-
-*/

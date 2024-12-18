@@ -22,17 +22,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Vider le conteneur
         ticketContainer.innerHTML = '';
 
-        const header = document.createElement('div');
+      /*  const header = document.createElement('div');
         header.classList.add('ticket-header');
         header.innerHTML = `
           <span>Nom</span>
           <span>Appareil</span>
           <span>N° Suivi</span>
           <span>Réparation</span>
+          <span>Commentaire</span>
           <span>Action</span>
         `;
         ticketContainer.appendChild(header);
-
+*/
         // Vérifie si des tickets sont reçus
         if (!Array.isArray(tickets) || tickets.length === 0) {
           const noTicketMsg = document.createElement('p');
@@ -44,26 +45,39 @@ document.addEventListener('DOMContentLoaded', () => {
         tickets.forEach(ticket => {
           const ticketElement = document.createElement('div');
           ticketElement.classList.add('ticket');
+
           ticketElement.innerHTML = `
             <span>${ticket.prenom} ${ticket.nom}</span>
-            <span>${ticket.lemodele}</span>
+            <span>${ticket.letype} ${ticket.lamarque || ''} ${ticket.lemodele || ''} ${ticket.autre_appareil || ''}</span>
             <span><a href="ticketClient.html?num_suivi=${ticket.num_suivi}">${ticket.num_suivi}</a></span>
             <span>${ticket.proposition || 'N/A'}</span>
           `;
 
+          // Ajout du champ commentaire et du bouton "Enregistrer"
+          const commentaireContainer = document.createElement('div');
+          commentaireContainer.classList.add('compartment');
+          commentaireContainer.innerHTML = `
+            <textarea id="commentaire-${ticket.num_suivi}" placeholder="Ajouter des notes">${ticket.commentaire || ''}</textarea>
+            <button onclick="modifierTicket('${ticket.num_suivi}')">Enregistrer</button>
+          `;
+          ticketElement.appendChild(commentaireContainer);
+
+          // Sauvegarde automatique du commentaire lors de la perte de focus
+          const textarea = commentaireContainer.querySelector(`#commentaire-${ticket.num_suivi}`);
+          textarea.addEventListener('blur', () => {
+            modifierTicket(ticket.num_suivi);
+          });
 
           const actionSpan = document.createElement('span');
           const button = document.createElement('button');
           button.classList.add('reprendre-btn');
           button.textContent = 'Reprendre';
           button.setAttribute('data-ticket-id', ticket.num_suivi);
-
-
           button.addEventListener('click', () => {
             reprendreReparation(ticket.num_suivi, ticketElement);
           });
-
           actionSpan.appendChild(button);
+
           ticketElement.appendChild(actionSpan);
 
           ticketContainer.appendChild(ticketElement);
@@ -74,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 });
+
 const BACKEND_URL_UpdateTicketStatus = 'http://localhost:3000/updateTicketStatus';
 
 function reprendreReparation(ticketId, ticketElement) {
@@ -92,10 +107,32 @@ function reprendreReparation(ticketId, ticketElement) {
       alert('Le statut du ticket a été mis à jour.');
       // Retirer le ticket de la liste actuelle
       ticketElement.parentElement.removeChild(ticketElement);
-      // Optionnel : Vous pouvez ajouter le ticket à la liste des réparations en cours
+      // Optionnel : rediriger ou mettre à jour une autre liste
     })
     .catch(error => {
       console.error('Erreur lors de la mise à jour du statut du ticket:', error);
       alert('Une erreur est survenue lors de la mise à jour du statut du ticket.');
+    });
+}
+
+function modifierTicket(ticketId) {
+  const commentaire = document.getElementById(`commentaire-${ticketId}`).value;
+
+  fetch('http://localhost:3000/modifierTicket', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ticketId: ticketId,
+      commentaire: commentaire
+    }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Réponse du serveur :', data);
+      alert('Le commentaire a été modifié avec succès.');
+    })
+    .catch(error => {
+      console.error('Erreur lors de la modification du commentaire :', error);
+      alert('Une erreur est survenue lors de la modification.');
     });
 }

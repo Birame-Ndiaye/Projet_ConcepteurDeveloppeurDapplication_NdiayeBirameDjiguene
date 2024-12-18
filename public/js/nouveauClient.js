@@ -54,7 +54,7 @@ $('#validerClient').click(function (e) {
     });
 
     // Vérification avant l'envoi
-    if (!formData.leNom || !formData.lePrenom || !formData.numTel || !formData.email) {
+    if (!formData.leNom || !formData.lePrenom || !formData.numTel ) {
         alert('Veuillez remplir tous les champs obligatoires.');
         return;
     }
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         const pageWidth = doc.internal.pageSize.getWidth();
-        let positionY = 10;
+        let positionY = 0;
 
         // Ajouter le logo à la place du titre RE-KONEKT
         const logoImage = document.getElementById('logo2');
@@ -178,22 +178,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Ajouter le logo centré
                 doc.addImage(logoDataURL, 'PNG', logoX, positionY, logoWidth, logoHeight);
-                positionY += logoHeight + 5;
+                positionY += logoHeight + 1;
 
                 // Ajouter la date du jour après le logo
                 addDate(doc, pageWidth, positionY);
-                positionY += 5;
+                positionY += 4;
 
                 // Ajouter les informations de contact
                 addContactInfo(doc, pageWidth, positionY);
-                positionY += 15;
+                positionY += 10;
 
-                // Ajouter le code-barres et les données du formulaire
-                addBarcodeAndData(doc, pageWidth, positionY, function (finalPositionY) {
-                    positionY = finalPositionY;
-                    // Sauvegarder le fichier PDF
-                    doc.save('fichier-suivi-client.pdf');
-                });
+               // Ajouter le code-barres et les données du formulaire
+addBarcodeAndData(doc, pageWidth, positionY, function (finalPositionY) {
+    positionY = finalPositionY;
+
+    // Récupérer le nom et le prénom du client directement à partir des éléments du DOM
+    const clientFirstName = document.getElementById('lePrenom') ? document.getElementById('lePrenom').value : 'prenom';
+    const clientLastName = document.getElementById('leNom') ? document.getElementById('leNom').value : 'nom';
+    const fileName = `${clientFirstName}-${clientLastName}-suivi-client.pdf`;
+    doc.save(fileName);
+});
+
+
+
             };
 
             imgLogo.onerror = function () {
@@ -201,22 +208,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 addDate(doc, pageWidth, positionY);
                 positionY += 5;
                 addContactInfo(doc, pageWidth, positionY);
-                positionY += 15;
-                addBarcodeAndData(doc, pageWidth, positionY, function (finalPositionY) {
-                    positionY = finalPositionY;
-                    doc.save('fichier-suivi-client.pdf');
-                });
+                positionY += 10;
+              // Ajouter le code-barres et les données du formulaire
+addBarcodeAndData(doc, pageWidth, positionY, function (finalPositionY) {
+    positionY = finalPositionY;
+
+    // Récupérer le nom et le prénom du client directement à partir des éléments du DOM
+    const clientFirstName = document.getElementById('lePrenom') ? document.getElementById('lePrenom').value : 'prenom';
+    const clientLastName = document.getElementById('leNom') ? document.getElementById('leNom').value : 'nom';
+    const fileName = `${clientFirstName}-${clientLastName}-suivi-client.pdf`;
+    doc.save(fileName);
+});
+
             };
         } else {
             console.error('Logo introuvable.');
             addDate(doc, pageWidth, positionY);
             positionY += 5;
             addContactInfo(doc, pageWidth, positionY);
-            positionY += 15;
-            addBarcodeAndData(doc, pageWidth, positionY, function (finalPositionY) {
-                positionY = finalPositionY;
-                doc.save('fichier-suivi-client.pdf');
-            });
+            positionY += 10;
+           // Ajouter le code-barres et les données du formulaire
+        addBarcodeAndData(doc, pageWidth, positionY, function (finalPositionY) {
+            positionY = finalPositionY;
+
+            // Récupérer le nom et le prénom du client directement à partir des éléments du DOM
+            const clientFirstName = document.getElementById('lePrenom') ? document.getElementById('lePrenom').value : 'prenom';
+            const clientLastName = document.getElementById('leNom') ? document.getElementById('leNom').value : 'nom';
+            const fileName = `${clientFirstName}-${clientLastName}-suivi-client.pdf`;
+            doc.save(fileName);
+        });
         }
     });
 
@@ -279,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('Type:', type);
         const marque = document.getElementById('lamarque') ? document.getElementById('lamarque').value : 'Non spécifié';
         console.log('Marque:', marque);
-        const modele = document.getElementById('lemodele') ? document.getElementById('lemodele').value : 'Non spécifié';
+        const modele = (document.getElementById('lemodele') && document.getElementById('autre_appareil')) ? document.getElementById('lemodele').value + ' ' + document.getElementById('autre_appareil').value : 'Non spécifié';
         console.log('Modèle:', modele);
         const imei = document.getElementById('serie_imei') ? document.getElementById('serie_imei').value : 'Non spécifié';
         console.log('SN / IMEI:', imei);
@@ -288,9 +308,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const panne = document.getElementById('consta') ? document.getElementById('consta').value : 'Non spécifié';
         console.log('Panne:', panne);
         const reparationProposee = document.getElementById('proposition') ? document.getElementById('proposition').value : 'Non spécifié';
-        console.log('Réparation Proposée:', reparationProposee);
+        console.log('Réparation :', reparationProposee);
         const prix = document.getElementById('prix') ? document.getElementById('prix').value : 'Non spécifié';
         console.log('Prix:', prix);
+        const acompte = document.getElementById('acompte') ? document.getElementById('acompte').value : 'Non spécifié';
+        console.log('acompte:', prix);
         const accordClient = document.querySelector('input[name="accord"]:checked') ? document.querySelector('input[name="accord"]:checked').value : 'Non spécifié';
         console.log('Accord Client:', accordClient);
         const noteCommentaire = document.getElementById('noteClient') ? document.getElementById('noteClient').value : 'Non spécifié';
@@ -310,8 +332,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const barcodeCanvas = document.getElementById('barcodeCanvas');
         const barcodeDataURL = barcodeCanvas.toDataURL('image/png');
-        const barcodeWidth = 50;
-        const barcodeHeight = 20;
+        const barcodeWidth = 30;
+        const barcodeHeight = 10;
         const barcodeX = (pageWidth - barcodeWidth) / 2;
 
         doc.addImage(barcodeDataURL, 'PNG', barcodeX, positionY, barcodeWidth, barcodeHeight);
@@ -329,22 +351,32 @@ document.addEventListener('DOMContentLoaded', function () {
             { label: 'SN / IMEI :', value: imei },
             { label: 'ÉTAT :', value: etat },
             { label: 'PANNE :', value: panne },
-            { label: 'RÉPARATION PROPOSÉE :', value: reparationProposee },
+            { label: 'RÉPARATION :', value: reparationProposee },
             { label: 'PRIX :', value: prix + ' €' },
+            { label: 'Acompte :', value: acompte + ' €' },
             { label: 'ACCORD CLIENT :', value: accordClient },
             { label: 'NOTE / COMMENTAIRE :', value: noteCommentaire },
         ];
 
         doc.setFontSize(10);
         champs.forEach(item => {
+            // Positionner le label à gauche
             doc.setFont('helvetica', 'bold');
             doc.text(item.label, 4, positionY);
-            positionY += 3;
+        
+            // Diviser la valeur si elle est trop longue pour tenir sur la ligne
             doc.setFont('helvetica', 'normal');
-            doc.text(item.value, 9, positionY);
-            positionY += 5;
+            const splitValue = doc.splitTextToSize(item.value, 40); // Ajuster la largeur selon votre format
+        
+            // Afficher la valeur après le label
+            doc.text(splitValue, 40, positionY);
+            
+            // Ajuster la position Y en fonction du nombre de lignes du texte
+            positionY += (splitValue.length * 8); // Ajuster l'espacement entre les lignes selon votre besoin
         });
 
         callback(positionY);
     }
+
 });
+
